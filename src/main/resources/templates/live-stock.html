@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Live Stock Prices</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background: linear-gradient(to right, #c2e9fb, #a1c4fd);
+            font-family: 'Segoe UI', sans-serif;
+            padding-top: 60px;
+        }
+
+        #stockPrice {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #0d47a1;
+        }
+
+        #stockChart {
+            height: 400px;
+        }
+    </style>
+</head>
+<body>
+<div class="container text-center">
+    <h1 class="mb-4">Live Stock Prices</h1>
+    <p class="lead text-muted">Monitor real-time stock updates</p>
+
+    <div id="stockPrice">Loading...</div>
+    <div id="stockChart">
+        <canvas id="stockPriceChart"></canvas>
+    </div>
+
+    <a href="/dashboard" class="btn btn-outline-primary mt-4">Back to Dashboard</a>
+</div>
+
+<!-- WebSocket Integration -->
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/dist/stomp.min.js"></script>
+
+<script>
+    var socket = new SockJS('/ws-stock');
+    var stompClient = Stomp.over(socket);
+
+    var stockHistory = [];
+    var stockPrices = [];
+
+    stompClient.connect({}, function(frame) {
+        stompClient.subscribe('/topic/stock', function(stockData) {
+            var stock = JSON.parse(stockData.body);
+            document.getElementById('stockPrice').innerText = 'Price: $' + stock.price;
+
+            // Store stock prices for chart update
+            stockHistory.push(stock.price);
+            if (stockHistory.length > 10) {
+                stockHistory.shift(); // Keep only last 10 prices
+            }
+
+            stockPrices.push(stock.price);
+            updateChart();
+        });
+    });
+
+    var ctx = document.getElementById('stockPriceChart').getContext('2d');
+    var stockPriceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Array(10).fill(''),
+            datasets: [{
+                label: 'Stock Price History',
+                data: stockHistory,
+                borderColor: '#0d47a1',
+                fill: false,
+                tension: 0.1
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    ticks: { display: false }
+                },
+                y: {
+                    beginAtZero: false
+                }
+            }
+        }
+    });
+
+    function updateChart() {
+        stockPriceChart.update();
+    }
+</script>
+</body>
+</html>
