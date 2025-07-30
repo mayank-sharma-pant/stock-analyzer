@@ -26,7 +26,6 @@ public class PortfolioService {
     @Autowired
     private UserRepository userRepository;
 
-    // Add a stock to the user's portfolio
     public Portfolio addStockToPortfolio(Long userId, String symbol, int quantity, double purchasePrice) {
         if (quantity <= 0) {
             throw new IllegalArgumentException("Quantity must be greater than 0");
@@ -40,32 +39,32 @@ public class PortfolioService {
         portfolio.setQuantity(quantity);
         portfolio.setPurchasePrice(purchasePrice);
 
-        // Save the portfolio first
+
         Portfolio savedPortfolio = portfolioRepository.save(portfolio);
 
-        // Fetch the live price and update the portfolio
+
         Double livePrice = fetchLivePrice(symbol);
         if (livePrice != null) {
             savedPortfolio.setLivePrice(livePrice);
         } else {
-            savedPortfolio.setLivePrice(0.0);  // Fallback value if live price cannot be fetched
+            savedPortfolio.setLivePrice(0.0);
         }
 
-        // Save with live price
+
         portfolioRepository.save(savedPortfolio);
 
         return savedPortfolio;
     }
 
-    // View the portfolio of a user with live price and profit/loss
+
     public List<Portfolio> getPortfolio(Long userId) {
         List<Portfolio> portfolios = portfolioRepository.findByUserId(userId);
         for (Portfolio p : portfolios) {
-            // Fetch live price for each stock
+
             Double livePrice = fetchLivePrice(p.getSymbol());
             p.setLivePrice(livePrice != null ? livePrice : 0.0);  // Fallback to 0.0 if live price is unavailable
 
-            // Calculate profit/loss
+
             if (livePrice != null) {
                 double profitLoss = (livePrice - p.getPurchasePrice()) * p.getQuantity();
                 p.setProfitLoss(profitLoss);
@@ -74,7 +73,7 @@ public class PortfolioService {
         return portfolios;
     }
 
-    // Remove a stock from the portfolio
+
     public void removeStockFromPortfolio(Long portfolioId) {
         Optional<Portfolio> portfolioOptional = portfolioRepository.findById(portfolioId);
         if (portfolioOptional.isPresent()) {
@@ -84,7 +83,7 @@ public class PortfolioService {
         }
     }
 
-    // Update the quantity or purchase price of a stock in the portfolio
+
     public Portfolio updateStockInPortfolio(Long portfolioId, int newQuantity, double newPurchasePrice) {
         if (newQuantity <= 0) {
             throw new IllegalArgumentException("Quantity must be greater than 0");
@@ -99,7 +98,7 @@ public class PortfolioService {
         return portfolioRepository.save(portfolio);
     }
 
-    // Helper: Fetch live stock price from Alpha Vantage
+
     private Double fetchLivePrice(String symbol) {
         try {
             String requestUrl = String.format(ALPHA_VANTAGE_URL, symbol, API_KEY);

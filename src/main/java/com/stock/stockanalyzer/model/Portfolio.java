@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "portfolio") // Explicitly specify the table name
+@Table(name = "portfolio")
 @Data
 public class Portfolio {
     @Id
@@ -19,9 +19,7 @@ public class Portfolio {
     private int quantity;
     private double purchasePrice;
 
-    // Add live price field
     private double livePrice;
 
-    // Add profit/loss field
     private double profitLoss;
 }

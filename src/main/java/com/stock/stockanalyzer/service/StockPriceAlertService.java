@@ -30,18 +30,18 @@ public class StockPriceAlertService {
         return stockPriceAlertRepository.save(alert);
     }
 
-    // Scheduled task that runs every 5 minutes (adjust the interval as needed)
-    @Scheduled(fixedRate = 300000) // Runs every 5 minutes (300000ms)
+
+    @Scheduled(fixedRate = 300000)
     public void checkAlertsAndTrigger() {
         List<StockPriceAlert> alerts = stockPriceAlertRepository.findAll();
 
         for (StockPriceAlert alert : alerts) {
-            // Fetch the live stock price
+
             Double livePrice = fetchLivePrice(alert.getSymbol());
 
-            // Trigger the alert if conditions are met
+
             if (livePrice != null && livePrice >= alert.getTargetPrice() && !alert.isTriggered()) {
-                // Update alert status
+
                 alert.setTriggered(true);
                 stockPriceAlertRepository.save(alert);
 
@@ -52,18 +52,17 @@ public class StockPriceAlertService {
         }
     }
 
-    // Helper method to fetch live stock price (replace with actual API call)
+
     private Double fetchLivePrice(String symbol) {
-        // Example: Implement fetching price from the Alpha Vantage API
-        String apiKey = "N4UGPN9QQA7O0U72";  // Replace with your actual API key
+        String apiKey = "X4NXCSXGMJ02X79J";  // Replace with your actual API key
         String apiUrl = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=" + symbol + "&apikey=" + apiKey;
 
         try {
-            // Make the HTTP request to Alpha Vantage API (use HttpClient to fetch data)
+
             HttpResponse<String> response = HttpClient.newHttpClient()
                     .send(HttpRequest.newBuilder(URI.create(apiUrl)).build(), HttpResponse.BodyHandlers.ofString());
 
-            // Parse the response JSON to extract the stock price (this is a simplified example)
+
             JSONObject jsonResponse = new JSONObject(response.body());
             JSONObject timeSeries = jsonResponse.getJSONObject("Time Series (Daily)");
             String latestDate = timeSeries.keys().next();
@@ -71,7 +70,7 @@ public class StockPriceAlertService {
             return Double.parseDouble(latestData.getString("4. close"));
         } catch (Exception e) {
             e.printStackTrace();
-            return null;  // If an error occurs, return null
+            return null;
         }
     }
 }

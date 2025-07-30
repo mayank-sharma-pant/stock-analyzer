@@ -18,15 +18,15 @@ public class StockWebSocketController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    // Send stock price upon client request
+
     @MessageMapping("/requestStock")
     @SendTo("/topic/stock")
     public StockPriceDto onRequestStock() {
         return alphaVantageService.fetchLatestPrice("AAPL");
     }
 
-    // Sends stock update every 10 minutes to avoid exceeding API rate limit
-    @Scheduled(fixedRate = 600000)  // 600,000 milliseconds = 10 minutes
+
+    @Scheduled(fixedRate = 600000)
     public void sendStockUpdate() {
         StockPriceDto stock = alphaVantageService.fetchLatestPrice("AAPL");
         messagingTemplate.convertAndSend("/topic/stock", stock);

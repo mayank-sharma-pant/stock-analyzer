@@ -13,13 +13,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-stock")
-                .setAllowedOrigins("http://localhost:8080") // Allow connections from this origin
-                .withSockJS(); // Enable SockJS for fallback
+                .setAllowedOrigins("http://localhost:8080")
+                .withSockJS();
     }
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/topic"); // The topic for clients to subscribe to
-        registry.setApplicationDestinationPrefixes("/app"); // Prefix for client requests
+        registry.enableSimpleBroker("/topic");
+        registry.setApplicationDestinationPrefixes("/app");
     }
 }
